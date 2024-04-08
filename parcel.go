@@ -18,13 +18,17 @@ func (s ParcelStore) Add(p Parcel) (int, error) {
 	if err != nil {
 		return 0, err
 	}
-	currentNumberParcel, _ := q.LastInsertId()
+	currentNumberParcel, err := q.LastInsertId()
+	if err != nil {
+		return 0, err
+	}
 	return int(currentNumberParcel), nil
 }
 
 func (s ParcelStore) Get(number int) (Parcel, error) {
 	p := Parcel{}
-	err := s.db.QueryRow("SELECT number, client, status, address, created_at FROM parcel WHERE number = ?", number).Scan(&p.Number, &p.Client, &p.Status, &p.Address, &p.CreatedAt)
+	row := s.db.QueryRow("SELECT number, client, status, address, created_at FROM parcel WHERE number = ?", number)
+	err := row.Scan(&p.Number, &p.Client, &p.Status, &p.Address, &p.CreatedAt)
 	if err != nil {
 		return p, err
 	}
